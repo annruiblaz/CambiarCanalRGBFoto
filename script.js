@@ -9,8 +9,12 @@ input.addEventListener("change", (event) => {
     if(!file) return;
 
     const img = new Image();
+    const img2 = new Image();
     img.src = URL.createObjectURL(file);
+    img2.src = URL.createObjectURL(file);
 
+
+    //Para modificar valores de un canal
     img.onload = () => {
         //Ajustamos el tamaño del canvas
         canvasOriginal.width = canvasModified.width = img.width;
@@ -56,5 +60,21 @@ input.addEventListener("change", (event) => {
         
         //Liberamos la memoria
         modifiedTensor.dispose();
+    }
+
+    const canvasGrey = document.getElementById('canvasGrey');
+    const ctx = canvasGrey.getContext("2d");
+    //Para pasar a "escala de grises" a saco
+    img2.onload = () => {
+        canvasGrey.width = img2.width;
+        canvasGrey.height = img2.height;
+        ctx.drawImage(img2, 0, 0);
+
+        //Convertimos la img a escala de grises
+        // el 2º parametro de fromPixels indica canales, por defecto coge los 4
+        //Pero podemos indicarle 3 o 1 para q ese caso haga una media ponderada de los 3 canales RGB
+        const tensorGrey = tf.browser.fromPixels(img2, 1);
+        tensorGrey.print();
+        tf.browser.toPixels(tensorGrey, canvasGrey);
     }
 });
